@@ -62,8 +62,16 @@ module "alb" {
   # Listener HTTP
   listeners = {
     http = {
-      port     = 80
-      protocol = "HTTP"
+      port            = 80
+      protocol        = "HTTP"
+      
+      # authenticate_cognito = {
+      #     user_pool_arn       = aws_cognito_user_pool.user_pool.arn
+      #     user_pool_client_id = aws_cognito_user_pool_client.app_client.id
+      #     user_pool_domain    = aws_cognito_user_pool_domain.pool_domain.domain
+      #     on_unauthenticated_request = "authenticate"
+
+      # }
 
   # Domyślna akcja — np. kieruj wszystko do frontendu
       forward = {
@@ -90,6 +98,11 @@ module "alb" {
       }
     }
   }
+  #   depends_on = [
+  #   aws_cognito_user_pool.user_pool,
+  #   aws_cognito_user_pool_client.app_client,
+  #   aws_cognito_user_pool_domain.pool_domain
+  # ]
 }
 
 ########################################
@@ -154,6 +167,14 @@ module "ecs_service_backend" {
           hostPort      = 8080
           protocol      = "tcp"
       }]
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.backend_logs.name
+          "awslogs-region"        = "us-east-1" # <-- Ustaw swój region
+          "awslogs-stream-prefix" = "ecs-backend"
+        }
+      }
       environment = [
         { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${var.db_name}" },
         { name = "SPRING_DATASOURCE_USERNAME", value = var.db_username },
