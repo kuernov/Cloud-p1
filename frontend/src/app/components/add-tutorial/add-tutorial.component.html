@@ -1,0 +1,51 @@
+<div class="submit-form">
+  <!-- Formularz do dodawania tutoriala -->
+  <div *ngIf="!submitted">
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input
+        type="text"
+        class="form-control"
+        id="title"
+        required
+        [(ngModel)]="tutorial.title"
+        name="title"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <input
+        type="text"
+        class="form-control"
+        id="description"
+        required
+        [(ngModel)]="tutorial.description"
+        name="description"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="file">Select File</label>
+      <input
+        type="file"
+        class="form-control"
+        id="file"
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    <button
+      (click)="uploadFileAndCreateTutorial()"
+      class="btn btn-success"
+      [disabled]="!tutorial.title || !tutorial.description || !selectedFile"
+    >
+      Submit
+    </button>
+  </div>
+
+  <div *ngIf="submitted">
+    <h4>Tutorial was submitted successfully!</h4>
+    <button class="btn btn-success" (click)="newTutorial()">Add</button>
+  </div>
+</div>
