@@ -1,6 +1,7 @@
 package com.bezkoder.spring.jpa.postgresql.service;
 
-// === WSZYSTKIE IMPORTY MUSZĄ BYĆ TUTAJ, NA GÓRZE ===
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import com.bezkoder.spring.jpa.postgresql.config.FileNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -59,22 +60,39 @@ public class FileStorageService {
         }
     }
 
-    /**
+/**
      * Ładuje plik z S3 jako zasób (Resource), który można strumieniować.
+     * Obsługuje różne wersje pliku (oryginał vs. miniaturka).
      */
-    public Resource loadFile(String filename) {
+    public Resource loadFile(String filename, String version) {
+        
+        String s3Key;
+        if ("thumbnail".equals(version)) {
+            s3Key = "thumbnails/" + filename;
+        } else {
+            s3Key = filename; 
+        }
+
         try {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(filename)
+                    .key(s3Key)
                     .build();
 
             ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getObjectRequest);
 
             return new InputStreamResource(s3Object);
             
+        } catch (NoSuchKeyException e) {
+            // ↓↓↓ NAJWAŻNIEJSZA ZMIANA ↓↓↓
+            // S3 rzuciło 'NoSuchKeyException' - pliku nie ma.
+            // Rzucamy nasz własny wyjątek, który Spring zamieni na 404.
+            throw new FileNotFoundException("Nie znaleziono pliku w S3: " + s3Key, e);
+
         } catch (S3Exception e) {
-            throw new RuntimeException("Nie można odczytać pliku z S3: " + filename, e);
+            // Wystąpił inny, nieoczekiwany błąd S3 (np. brak uprawnień)
+            // To jest błąd 500
+            throw new RuntimeException("Nie można odczytać pliku z S3: " + s3Key, e);
         }
     }
 

@@ -65,13 +65,7 @@ module "alb" {
       port            = 80
       protocol        = "HTTP"
       
-      # authenticate_cognito = {
-      #     user_pool_arn       = aws_cognito_user_pool.user_pool.arn
-      #     user_pool_client_id = aws_cognito_user_pool_client.app_client.id
-      #     user_pool_domain    = aws_cognito_user_pool_domain.pool_domain.domain
-      #     on_unauthenticated_request = "authenticate"
 
-      # }
 
   # Domyślna akcja — np. kieruj wszystko do frontendu
       forward = {
@@ -98,11 +92,6 @@ module "alb" {
       }
     }
   }
-  #   depends_on = [
-  #   aws_cognito_user_pool.user_pool,
-  #   aws_cognito_user_pool_client.app_client,
-  #   aws_cognito_user_pool_domain.pool_domain
-  # ]
 }
 
 ########################################

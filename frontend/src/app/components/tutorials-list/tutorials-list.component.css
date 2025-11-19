@@ -3,3 +3,26 @@
   max-width: 750px;
   margin: auto;
 }
+
+/* W pliku: tutorials-list.component.css */
+
+.list-group-item {
+  /* Układa obrazek i tekst obok siebie */
+  display: flex;
+  align-items: center;
+}
+
+.tutorial-thumbnail {
+  /* Nadaje miniaturce stały rozmiar */
+  width: 60px;
+  height: 60px;
+  
+  /* Ważne, jeśli obrazki nie są kwadratowe - zapobiega rozciąganiu */
+  object-fit: cover; 
+  
+  /* Dodaje odstęp między obrazkiem a tytułem */
+  margin-right: 15px;
+  
+  /* Lekkie zaokrąglenie rogów */
+  border-radius: 5px;
+}

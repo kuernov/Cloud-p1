@@ -50,32 +50,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "media_lifecycle" {
     }
   }
 }
-
-# data "aws_iam_policy_document" "s3_media_access" {
-#   statement {
-#     sid = "AllowMediaBucketAccess"
-#     actions = [
-#       "s3:GetObject",
-#       "s3:PutObject",
-#       "s3:DeleteObject"
-#     ]
-#     resources = [
-#       "${aws_s3_bucket.media.arn}/*" # Dostęp do OBIEKTÓW w buckecie
-#     ]
-#   }
-#   statement {
-#     sid = "AllowBucketListing"
-#     actions = [
-#       "s3:ListBucket"
-#     ]
-#     resources = [
-#       aws_s3_bucket.media.arn # Dostęp do samego BUCKETA
-#     ]
-#   }
-# }
-
-# # 2. Stworzenie zasobu Polityki IAM z tego JSONa
-# resource "aws_iam_policy" "s3_media_policy" {
-#   name   = "${var.project}-s3-media-access-policy-${var.env}"
-#   policy = data.aws_iam_policy_document.s3_media_access.json
-# }

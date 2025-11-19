@@ -33,11 +33,10 @@ public class FileController {
      * Ta metoda została uproszczona, aby współpracować z S3.
      */
     @GetMapping("/{filename}")
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
+    public ResponseEntity<Resource> getFile(@PathVariable String filename, @RequestParam(name = "version", defaultValue = "original") String version) {
         
         // 1. Nowy serwis zwraca bezpośrednio 'Resource', a nie 'Path'
-        Resource resource = fileStorageService.loadFile(filename);
-
+        Resource resource = fileStorageService.loadFile(filename, version);
         // 2. Usunięto sprawdzanie 'filePath.toFile().exists()' i 'UrlResource'.
         // Jeśli plik nie istnieje w S3, 'loadFile' rzuci wyjątek, 
         // który Spring automatycznie zamieni na błąd 404 lub 500.

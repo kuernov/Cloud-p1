@@ -19,6 +19,21 @@ export class TutorialsListComponent implements OnInit {
     this.retrieveTutorials();
   }
 
+  /**
+   * Zwraca URL do obrazka, domyślnie prosi o oryginał.
+   * @param imagePath - Nazwa pliku (z tutorial.imagePath)
+   * @param version - 'original' lub 'thumbnail'
+   */
+  getImageUrl(imagePath: string, version: string = 'original'): string {
+    if (!imagePath) {
+      // Jeśli tutorial nie ma obrazka, zwróć pusty string
+      return '';
+    }
+    
+    // Budujemy URL z parametrem ?version=...
+    return `/api/files/${imagePath}?version=${version}`;
+  }
+
   retrieveTutorials(): void {
     this.tutorialService.getAll().subscribe({
       next: (data) => {
