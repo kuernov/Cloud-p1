@@ -1,15 +1,15 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import Auth from '@aws-amplify/auth';
+import { getCurrentUser } from 'aws-amplify/auth';
 
 export const authGuard: CanActivateFn = async () => {
   const router = inject(Router);
 
   try {
-    await Auth.getCurrentUser(); // zamiast currentAuthenticatedUser()
-    return true; // użytkownik zalogowany, pozwól wejść
+    await getCurrentUser(); 
+    return true;
   } catch {
-    router.navigate(['/login']); // przekieruj na login jeśli nie
+    router.navigate(['/login']);
     return false;
   }
 };

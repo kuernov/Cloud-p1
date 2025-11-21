@@ -98,7 +98,6 @@ module "alb" {
 # Backend ECS Service
 ########################################
 module "ecs_service_backend" {
-  count   = var.create_ecs_services ? 1 : 0
   source  = "terraform-aws-modules/ecs/aws//modules/service"
   version = "6.7.0"
   
@@ -156,20 +155,40 @@ module "ecs_service_backend" {
           hostPort      = 8080
           protocol      = "tcp"
       }]
-      logConfiguration = {
-        logDriver = "awslogs",
-        options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.backend_logs.name
-          "awslogs-region"        = "us-east-1" # <-- Ustaw swój region
-          "awslogs-stream-prefix" = "ecs-backend"
-        }
+      # logConfiguration = {
+      #   logDriver = "awslogs",
+      #   options = {
+      #     "awslogs-group"         = aws_cloudwatch_log_group.backend_logs.name
+      #     "awslogs-region"        = var.aws_region
+      #     "awslogs-stream-prefix" = "ecs-backend"
+      #   }
+      # }
+environment = [
+      {
+        name  = "SPRING_DATASOURCE_URL"
+        value = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${var.db_name}"
+      },
+      {
+        name  = "SPRING_DATASOURCE_USERNAME"
+        value = var.db_username
+      },
+      {
+        name  = "SPRING_DATASOURCE_PASSWORD"
+        value = var.db_password
+      },
+      {
+        name  = "S3_BUCKET"
+        value = aws_s3_bucket.media.bucket
+      },
+      {
+        name  = "AWS_REGION"
+        value = var.aws_region
+      },
+      {
+        name  = "COGNITO_USER_POOL_ID"
+        value = aws_cognito_user_pool.user_pool.id
       }
-      environment = [
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${var.db_name}" },
-        { name = "SPRING_DATASOURCE_USERNAME", value = var.db_username },
-        { name = "SPRING_DATASOURCE_PASSWORD", value = var.db_password },
-        { name = "S3_BUCKET", value = aws_s3_bucket.media.bucket }
-      ]
+    ]
       mountPoints = [
         {
           sourceVolume  = "tomcat-tmp" # Musi pasować do 'name' z 'volume' powyżej
@@ -187,24 +206,17 @@ module "ecs_service_backend" {
 # Frontend ECS Service
 ########################################
 module "ecs_service_frontend" {
-  count   = var.create_ecs_services ? 1 : 0
   source  = "terraform-aws-modules/ecs/aws//modules/service"
   version = "6.7.0"
 
   name        = "frontend"
   cluster_arn = module.ecs_cluster.cluster_arn
 
-# Wyłącz tworzenie roli wykonawczej (Task Execution Role)
+  # Rola LabRole (OK dla AWS Academy)
   create_task_exec_iam_role = false
-  
-  # Zamiast tego, użyj ARN roli 'LabRole'
-  task_exec_iam_role_arn = data.aws_iam_role.lab_role.arn
-
-  # Wyłącz tworzenie roli zadania (Task Role)
-  create_tasks_iam_role = false
-  
-  # Zamiast tego, również użyj ARN roli 'LabRole'
-  tasks_iam_role_arn = data.aws_iam_role.lab_role.arn
+  task_exec_iam_role_arn    = data.aws_iam_role.lab_role.arn
+  create_tasks_iam_role     = false
+  tasks_iam_role_arn        = data.aws_iam_role.lab_role.arn
 
   cpu           = 256
   memory        = 512
@@ -222,16 +234,14 @@ module "ecs_service_frontend" {
       container_port   = 80 
     }
   }
+    enable_execute_command = true
 
-  # === KROK 1: ZDEFINIUJ WOLUMENY NA POZIOMIE ZADANIA ===
-  # To mówi Fargate, aby przygotował dwa puste, zarządzane wolumeny
+  # Wolumeny dla Nginx (Bardzo dobrze, że to masz! Nginx tego potrzebuje na Fargate)
   volume = {
-    "frontend_cache" = {
-      name = "nginx-cache" # Nazwa dla cache Nginx
-    },
-    "frontend_run" = {
-      name = "nginx-run" # Nazwa dla plików .pid Nginx
-    }
+    "frontend_cache" = { name = "nginx-cache" },
+    "frontend_run"   = { name = "nginx-run" },
+    "frontend_tmp"   = { name = "nginx-tmp" }
+
   }
 
   container_definitions = {
@@ -239,29 +249,50 @@ module "ecs_service_frontend" {
       name      = "frontend"
       image     = "${aws_ecr_repository.frontend.repository_url}:latest"
       essential = true
+      
       portMappings = [
         {
           containerPort = 80
           hostPort      = 80
-          protocol       = "tcp"
+          protocol      = "tcp"
         }
       ]
-      mountPoints = [
+
+      # ### TO TRZEBA DODAĆ (Przekazanie danych z Terraform do Dockera) ###
+      environment = [
         {
-          sourceVolume  = "nginx-cache" # Musi pasować do 'name' z 'volume'
-          containerPath = "/var/cache/nginx"
-          readOnly      = false # WAŻNE: 'false' oznacza zapisywalny
+          name  = "COGNITO_REGION"
+          value = var.aws_region
         },
         {
-          sourceVolume  = "nginx-run" # Musi pasować do 'name' z 'volume'
+          name  = "COGNITO_USER_POOL_ID"
+          value = aws_cognito_user_pool.user_pool.id # Upewnij się, że nazwa zasobu (my_pool) jest poprawna!
+        },
+        {
+          name  = "COGNITO_APP_CLIENT_ID"
+          value = aws_cognito_user_pool_client.app_client.id # Tutaj też sprawdź nazwę zasobu
+        }
+      ]
+
+      mountPoints = [
+        {
+          sourceVolume  = "nginx-cache"
+          containerPath = "/var/cache/nginx"
+          readOnly      = false
+        },
+        {
+          sourceVolume  = "nginx-run"
           containerPath = "/var/run"
-          readOnly      = false # WAŻNE: 'false' oznacza zapisywalny
+          readOnly      = false
+        },
+        {
+          sourceVolume  = "nginx-tmp"
+          containerPath = "/tmp"
+          readOnly      = false
         }
       ]
     }
   }
-
 }
-
 
 

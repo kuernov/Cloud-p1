@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
-import Auth from '@aws-amplify/auth';
+import {
+  signUp,
+  signIn,
+  signOut,
+  fetchAuthSession,
+  confirmSignUp,
+  getCurrentUser
+} from 'aws-amplify/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -7,24 +14,47 @@ import Auth from '@aws-amplify/auth';
 export class AuthService {
 
   async signUp(email: string, password: string) {
-    return await Auth.signUp({ username: email, password });
+    return await signUp({
+      username: email,
+      password,
+      // ▼▼▼ KLUCZOWA POPRAWKA ▼▼▼
+      // Musisz przekazać email w userAttributes, bo Cognito tego wymaga
+      options: {
+        userAttributes: {
+          email: email
+        },
+        // Opcjonalnie: automatyczne logowanie po potwierdzeniu maila
+        autoSignIn: true
+      }
+      // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+    });
+  }
+
+    async confirmUser(email: string, code: string) {
+    return await confirmSignUp({
+      username: email,
+      confirmationCode: code
+    });
   }
 
   async signIn(email: string, password: string) {
-    const user = await Auth.signIn({ username: email, password }); // obiekt zamiast dwóch argumentów
-    const session = await Auth.getSession(); // zamiast currentSession()
+    const result = await signIn({ username: email, password });
+
+    // Pobieramy sesję, aby uzyskać tokeny (JWT)
+    const session = await fetchAuthSession();
+
     return {
-      idToken: session.getIdToken().getJwtToken(),
-      accessToken: session.getAccessToken().getJwtToken(),
-      refreshToken: session.getRefreshToken().getToken()
+      result,
+      idToken: session.tokens?.idToken,
+      accessToken: session.tokens?.accessToken,
     };
   }
 
   async signOut() {
-    return await Auth.signOut();
+    return await signOut();
   }
 
   async getCurrentUser() {
-    return await Auth.getCurrentUser(); // zamiast currentAuthenticatedUser()
+    return await getCurrentUser();
   }
 }

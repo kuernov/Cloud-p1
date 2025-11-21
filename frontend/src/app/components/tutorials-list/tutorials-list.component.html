@@ -21,19 +21,24 @@
 
   <div class="col-md-6">
     <h4>Tutorials List</h4>
-  <ul class="list-group">
+    <ul class="list-group">
       <li
         class="list-group-item"
         *ngFor="let tutorial of tutorials; let i = index"
         [class.active]="i === currentIndex"
+        (click)="setActiveTutorial(tutorial, i)"
       >
-        
-        <img
-          *ngIf="tutorial.imagePath"
-          class="tutorial-thumbnail"
-          [src]="getImageUrl(tutorial.imagePath, 'thumbnail')"
-          alt="Miniaturka"
-        />
+        <!-- ▼▼▼ POPRAWIONA SEKCJA ZDJĘCIA ▼▼▼ -->
+        <!-- Dodaliśmy Pipe '| secureImage | async' aby obsłużyć tokeny Cognito -->
+        <div *ngIf="tutorial.imagePath" class="float-left mr-3">
+            <img
+            class="tutorial-thumbnail"
+            [src]="getImageUrl(tutorial.imagePath, 'thumbnail') | secureImage | async"
+            alt="Miniaturka"
+            style="width: 80px; height: 80px; object-fit: cover; margin-right: 10px; border-radius: 5px;"
+            />
+        </div>
+        <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
 
         <a [routerLink]="['/tutorials', tutorial.id]">{{ tutorial.title }}</a>
       </li>
@@ -42,5 +47,14 @@
     <button class="m-3 btn btn-sm btn-danger" (click)="removeAllTutorials()">
       Remove All
     </button>
+  </div>
+  
+  <!-- Opcjonalnie: Prawa kolumna ze szczegółami (jeśli masz w komponencie) -->
+  <div class="col-md-6">
+    <app-tutorial-details
+      *ngIf="currentTutorial.id"
+      [viewMode]="true"
+      [currentTutorial]="currentTutorial"
+    ></app-tutorial-details>
   </div>
 </div>

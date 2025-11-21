@@ -13,6 +13,9 @@ import { TutorialDetailsComponent } from './components/tutorial-details/tutorial
 import { TutorialsListComponent } from './components/tutorials-list/tutorials-list.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
+import { VerifyComponent } from './components/verify/verify.component';
+import { SecureImagePipe } from './pipes/secure-image.pipe'; // <--- 1. IMPORT
+
 
 @NgModule({
   declarations: [
@@ -21,13 +24,16 @@ import { RegisterComponent } from './components/register/register.component';
     TutorialDetailsComponent,
     TutorialsListComponent,
     LoginComponent,      
-    RegisterComponent  
+    RegisterComponent,
+    VerifyComponent,
+    SecureImagePipe  
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
     providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
