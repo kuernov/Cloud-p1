@@ -28,8 +28,6 @@
         [class.active]="i === currentIndex"
         (click)="setActiveTutorial(tutorial, i)"
       >
-        <!-- ▼▼▼ POPRAWIONA SEKCJA ZDJĘCIA ▼▼▼ -->
-        <!-- Dodaliśmy Pipe '| secureImage | async' aby obsłużyć tokeny Cognito -->
         <div *ngIf="tutorial.imagePath" class="float-left mr-3">
             <img
             class="tutorial-thumbnail"
@@ -49,7 +47,6 @@
     </button>
   </div>
   
-  <!-- Opcjonalnie: Prawa kolumna ze szczegółami (jeśli masz w komponencie) -->
   <div class="col-md-6">
     <app-tutorial-details
       *ngIf="currentTutorial.id"

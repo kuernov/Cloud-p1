@@ -12,7 +12,8 @@
       <label><strong>Status:</strong></label> {{ currentTutorial.published ? "Published" : "Pending" }}
     </div>
     <div *ngIf="currentTutorial.imagePath">
-      <img [src]="getImageUrl()" alt="Tutorial Image" style="max-width:400px; max-height:400px;" />
+      <!-- ▼▼▼ POPRAWKA: Dodano Pipe secureImage i async ▼▼▼ -->
+      <img [src]="getImageUrl() | secureImage | async" alt="Tutorial Image" style="max-width:400px; max-height:400px;" />
     </div>
     <a class="badge badge-warning" [routerLink]="['/tutorials', currentTutorial.id]">Edit</a>
   </div>
@@ -52,7 +53,8 @@
         </div>
 
         <div *ngIf="currentTutorial.imagePath">
-          <img [src]="getImageUrl()" alt="Tutorial Image" style="max-width:400px; max-height:400px;" />
+          <!-- ▼▼▼ POPRAWKA: Tutaj też dodano Pipe secureImage i async ▼▼▼ -->
+          <img [src]="getImageUrl() | secureImage | async" alt="Tutorial Image" style="max-width:400px; max-height:400px;" />
         </div>
       </form>
 

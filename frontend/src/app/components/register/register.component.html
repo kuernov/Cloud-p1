@@ -1,6 +1,52 @@
-<div>
-  <h2>Rejestracja</h2>
-  <input [(ngModel)]="email" placeholder="Email">
-  <input [(ngModel)]="password" placeholder="Hasło" type="password">
-  <button (click)="register()">Zarejestruj się</button>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="text-center mb-4">Create Account</h3>
+          
+          <form (ngSubmit)="register()">
+            <div class="form-group mb-3">
+              <label for="email">Email Address</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                id="email" 
+                placeholder="Enter email" 
+                [(ngModel)]="email" 
+                name="email"
+                required
+              >
+            </div>
+
+            <div class="form-group mb-4">
+              <label for="password">Password</label>
+              <input 
+                type="password" 
+                class="form-control" 
+                id="password" 
+                placeholder="Password" 
+                [(ngModel)]="password" 
+                name="password"
+                required
+              >
+              <small class="form-text text-muted">
+                Must contain uppercase, number, and special char if required.
+              </small>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">
+              Sign Up
+            </button>
+          </form>
+
+          <div class="text-center mt-3">
+            <p class="small">
+              Already have an account? <a routerLink="/login">Sign in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

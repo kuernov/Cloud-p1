@@ -1,12 +1,29 @@
 <div>
-  <nav class="navbar navbar-expand navbar-dark bg-dark">
-    <a href="#" class="navbar-brand">bezKoder</a>
+  <!-- Pasek nawigacji wyświetla się TYLKO, gdy showNavbar jest true -->
+  <nav class="navbar navbar-expand navbar-dark bg-dark" *ngIf="showNavbar">
+    <a href="#" class="navbar-brand">MyApp</a>
+    
     <div class="navbar-nav mr-auto">
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="isLoggedIn">
         <a routerLink="tutorials" class="nav-link">Tutorials</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="isLoggedIn">
         <a routerLink="add" class="nav-link">Add</a>
+      </li>
+    </div>
+
+    <div class="navbar-nav ml-auto">
+      <!-- Te linki pojawią się w navbarze tylko na stronach INNYCH niż login/register,
+           jeśli użytkownik nie jest zalogowany (np. strona główna Home) -->
+      <li class="nav-item" *ngIf="!isLoggedIn">
+        <a routerLink="login" class="nav-link">Login</a>
+      </li>
+      <li class="nav-item" *ngIf="!isLoggedIn">
+        <a routerLink="register" class="nav-link">Sign Up</a>
+      </li>
+
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" style="cursor: pointer;" (click)="logout()">Logout</a>
       </li>
     </div>
   </nav>

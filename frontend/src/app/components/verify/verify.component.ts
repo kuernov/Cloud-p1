@@ -1,29 +1,38 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router'; // Do przekierowania po sukcesie
-import { AuthService } from '../../services/auth.service'; // Twój serwis
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-verify',
   templateUrl: './verify.component.html'
 })
-export class VerifyComponent {
+export class VerifyComponent implements OnInit {
   email: string = '';
   code: string = '';
   errorMessage: string = '';
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['email']) {
+        this.email = params['email'];
+      }
+    });
+  }
 
   async verify() {
     try {
       await this.authService.confirmUser(this.email, this.code);
-      alert('Konto potwierdzone! Możesz się zalogować.');
-      this.router.navigate(['/login']); // Przekieruj do logowania
+      alert('Account verified! You can now login.');
+      this.router.navigate(['/login']); 
     } catch (error: any) {
-      console.error('Błąd weryfikacji', error);
-      this.errorMessage = error.message || 'Błąd weryfikacji.';
+      console.error('Verification error', error);
+      this.errorMessage = error.message || 'Verification failed.';
     }
   }
 }

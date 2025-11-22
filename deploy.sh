@@ -74,5 +74,5 @@ echo "✅ SUKCES! Obrazy są w ECR, a Cognito gotowe."
 echo "   Teraz możesz uruchomić 'terraform apply' (bez targetów), aby postawić ECS."
 echo "--------------------------------------------------"
 echo "✅ Obrazy wypchnięte do ECR!"
-cd ..
-terraform apply -auto-pprove
+cd $TERRAFORM_DIR
+terraform apply -auto-approve

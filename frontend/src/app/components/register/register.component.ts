@@ -19,17 +19,16 @@ export class RegisterComponent {
     try {
       await this.authService.signUp(this.email, this.password);
       
-      // alert('Rejestracja udana! Sprawdź kod w mailu.'); // Opcjonalnie usuń alert, żeby było płynniej
+      alert('Registration successful! Please check your email for the verification code.');
       
-      // ▼▼▼ PRZEKIEROWANIE Z PARAMETREM ▼▼▼
-      // Przenosimy użytkownika na /verify i doklejamy ?email=...
+      // Redirect to verify page with email parameter
       this.router.navigate(['/verify'], { 
         queryParams: { email: this.email } 
       });
       
     } catch (error) {
-      console.error('Błąd rejestracji', error);
-      alert('Nie udało się zarejestrować');
+      console.error('Registration error', error);
+      alert('Registration failed. Please try again.');
     }
   }
 }
